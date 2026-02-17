@@ -75,19 +75,25 @@ configure_shell() {
     # RCファイルがなければ作成
     touch "$rc_file"
 
+    # PATH が RC ファイルに記述されていなければ追加
+    if ! grep -q "${INSTALL_DIR}" "$rc_file" 2>/dev/null; then
+        log_info "${INSTALL_DIR} を PATH に追加しています..."
+        {
+            echo ""
+            echo "# Oh My Posh PATH"
+            echo "$path_line"
+        } >> "$rc_file"
+    fi
+
     # 重複追記を防ぐ
     if grep -q "oh-my-posh init" "$rc_file" 2>/dev/null; then
-        log_warn "既に Oh My Posh の設定が記述されているため、追記をスキップしました。"
+        log_warn "既に Oh My Posh の設定が記述されているため、init行の追記をスキップしました。"
         return 0
     fi
 
     {
         echo ""
         echo "# Oh My Posh Setup"
-        # PATH に含まれていなければ追加
-        if [[ ":$PATH:" != *":${INSTALL_DIR}:"* ]]; then
-            echo "$path_line"
-        fi
         echo "$init_line"
     } >> "$rc_file"
 
